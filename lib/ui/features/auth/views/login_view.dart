@@ -4,6 +4,7 @@ import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
 import 'package:servis_ku/ui/features/auth/views/register_view.dart';
+import 'package:servis_ku/ui/features/provider/views/beranda_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -31,7 +32,6 @@ class _LoginViewState extends State<LoginView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top texture banner (fixed height and cropped to fit width)
             SizedBox(
               width: double.infinity,
               height: 180,
@@ -62,7 +62,6 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 32),
                   
-                  // Phone Number Section
                   const Text(
                     'Phone Number',
                     style: TextStyle(
@@ -80,7 +79,6 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 24),
                   
-                  // Password Section
                   const Text(
                     'Password',
                     style: TextStyle(
@@ -98,11 +96,8 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Forgot Password Link
                   GestureDetector(
-                    onTap: () {
-                      // Action for forgot password
-                    },
+                    onTap: () {},
                     child: const Text(
                       'Forgot Password?',
                       style: TextStyle(
@@ -114,14 +109,16 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 36),
                   
-                  // Log In Button
                   CustomButton(
                     text: 'Log In',
                     onPressed: () {
-                      // Action for Login
                       final phone = _phoneController.text;
                       final password = _passwordController.text;
                       debugPrint('Phone: $phone, Password: $password');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const BerandaView()),
+                      );
                     },
                   ),
                   const SizedBox(height: 24),
