@@ -42,7 +42,6 @@ class CustomButton extends StatelessWidget {
     Color textColor;
     Color? borderColor;
 
-    // Define base colors
     final Color baseActiveColor = type == ButtonType.primary
         ? AppColors.primary
         : type == ButtonType.danger
@@ -55,7 +54,6 @@ class CustomButton extends StatelessWidget {
             ? AppColors.textPrimary
             : (customTextColor ?? AppColors.textPrimary);
 
-    // Color logic depending on variant
     switch (variant) {
       case ButtonVariant.filled:
         borderColor = null;
@@ -110,7 +108,6 @@ class CustomButton extends StatelessWidget {
         child: InkWell(
           onTap: isDisabled ? null : onPressed,
           borderRadius: BorderRadius.circular(borderRadius),
-          // We can customize highlightColor / splashColor to match theme
           splashColor: baseActiveColor.withValues(alpha: 0.1),
           highlightColor: baseActiveColor.withValues(alpha: 0.05),
           child: Center(

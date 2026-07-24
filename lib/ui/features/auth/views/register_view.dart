@@ -62,7 +62,6 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 32),
                   
-                  // Phone Number Section
                   const Text(
                     'Phone Number',
                     style: TextStyle(
@@ -80,7 +79,6 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 24),
                   
-                  // Password Section
                   const Text(
                     'Password',
                     style: TextStyle(
@@ -98,7 +96,6 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Password Confirmation Section
                   const Text(
                     'Password Confirmation',
                     style: TextStyle(
@@ -116,11 +113,9 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 36),
                   
-                  // Register Button
                   CustomButton(
                     text: 'Register',
                     onPressed: () {
-                      // Action for Register
                       final phone = _phoneController.text;
                       final password = _passwordController.text;
                       final confirmPassword = _passwordConfirmController.text;
@@ -129,7 +124,6 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   const SizedBox(height: 24),
                   
-                  // Login Link Footer
                   Center(
                     child: RichText(
                       text: TextSpan(
@@ -147,7 +141,6 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                // Pop back to LoginView screen
                                 Navigator.pop(context);
                               },
                           ),
