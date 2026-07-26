@@ -65,7 +65,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   void dispose() {
     _focusNode.removeListener(_onFocusChange);
-    // Only dispose if it was created internally
     if (widget.focusNode == null) {
       _focusNode.dispose();
     }
@@ -86,20 +85,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
     final normalBorderColor = widget.enabledBorderColor ?? 
         (isDark ? AppColors.borderNormal : const Color(0xFFD1D5DB));
 
-    // Default background color: fieldBackground in dark theme, transparent in light theme
     final defaultBgColor = isDark ? AppColors.fieldBackground : Colors.transparent;
     final bgColor = widget.backgroundColor ?? defaultBgColor;
     final bool isFilled = bgColor != Colors.transparent;
 
-    // Default text color: White in dark mode, Dark Gray in light mode
     final defaultTextColor = isDark ? AppColors.textPrimary : const Color(0xFF1F2937);
     final txtColor = widget.textColor ?? defaultTextColor;
 
-    // Default hint color: Muted gray in dark mode, Gray in light mode
     final defaultHintColor = isDark ? AppColors.textSecondary : const Color(0xFF9CA3AF);
     final hColor = widget.hintColor ?? defaultHintColor;
 
-    // Suffix icon handling
     Widget? finalSuffixIcon;
     if (widget.isPassword) {
       finalSuffixIcon = IconButton(
@@ -122,7 +117,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
       finalSuffixIcon = widget.suffixIcon;
     }
 
-    // Prefix icon handling
     Widget? finalPrefixIcon;
     if (widget.prefixIcon != null) {
       finalPrefixIcon = Icon(

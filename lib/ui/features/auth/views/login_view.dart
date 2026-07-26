@@ -3,24 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
+import 'package:servis_ku/ui/features/auth/views/register_view.dart';
+import 'package:servis_ku/ui/features/provider/views/beranda_view.dart';
 
-class RegisterView extends StatefulWidget {
-  const RegisterView({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
   @override
-  State<RegisterView> createState() => _RegisterViewState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _RegisterViewState extends State<RegisterView> {
+class _LoginViewState extends State<LoginView> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _passwordConfirmController = TextEditingController();
 
   @override
   void dispose() {
     _phoneController.dispose();
     _passwordController.dispose();
-    _passwordConfirmController.dispose();
     super.dispose();
   }
 
@@ -52,7 +52,7 @@ class _RegisterViewState extends State<RegisterView> {
                 children: [
                   const SizedBox(height: 12),
                   const Text(
-                    'Register',
+                    'Log In',
                     style: TextStyle(
                       color: Color(0xFF111827),
                       fontSize: 32,
@@ -94,32 +94,31 @@ class _RegisterViewState extends State<RegisterView> {
                     prefixIcon: Icons.lock_outline,
                     isPassword: true,
                   ),
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    'Password Confirmation',
-                    style: TextStyle(
-                      color: Color(0xFF1F2937),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                  const SizedBox(height: 16),
+                  
+                  GestureDetector(
+                    onTap: () {},
+                    child: const Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  CustomTextField(
-                    controller: _passwordConfirmController,
-                    hintText: 'Kata Sandi',
-                    prefixIcon: Icons.lock_outline,
-                    isPassword: true,
                   ),
                   const SizedBox(height: 36),
                   
                   CustomButton(
-                    text: 'Register',
+                    text: 'Log In',
                     onPressed: () {
                       final phone = _phoneController.text;
                       final password = _passwordController.text;
-                      final confirmPassword = _passwordConfirmController.text;
-                      debugPrint('Phone: $phone, Password: $password, Confirm: $confirmPassword');
+                      debugPrint('Phone: $phone, Password: $password');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const BerandaView()),
+                      );
                     },
                   ),
                   const SizedBox(height: 24),
@@ -132,16 +131,20 @@ class _RegisterViewState extends State<RegisterView> {
                           fontSize: 14,
                         ),
                         children: [
-                          const TextSpan(text: 'Sudah punya akun? '),
+                          const TextSpan(text: 'Belum punya akun? '),
                           TextSpan(
-                            text: 'Log In',
+                            text: 'Register',
                             style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                Navigator.pop(context);
+                                debugPrint('Navigate to Register');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const RegisterView()),
+                                );
                               },
                           ),
                         ],
