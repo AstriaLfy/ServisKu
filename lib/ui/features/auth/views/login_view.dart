@@ -4,7 +4,7 @@ import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
 import 'package:servis_ku/ui/features/auth/views/register_view.dart';
-import 'package:servis_ku/ui/features/provider/views/beranda_view.dart';
+import 'package:servis_ku/ui/features/provider/homepage/views/beranda_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
