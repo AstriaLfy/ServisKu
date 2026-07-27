@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/navbar.dart';
+import 'package:servis_ku/ui/features/provider/report/views/report_view.dart';
 import 'package:servis_ku/ui/features/provider/profile/views/profile_view.dart';
 
 class BerandaView extends StatefulWidget {
@@ -23,6 +24,10 @@ class _BerandaViewState extends State<BerandaView> {
         currentIndex: _currentNavIndex,
         items: Navbar.providerItems,
         onTap: (index) {
+          if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ReportView()),
           if (index == 3) {
             Navigator.pushReplacement(
               context,
