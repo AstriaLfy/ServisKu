@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
-import 'package:servis_ku/core/widgets/navbar.dart';
-import 'package:servis_ku/ui/features/provider/homepage/views/beranda_view.dart';
-import 'package:servis_ku/ui/features/provider/report/views/report_details_view.dart';
-import 'package:servis_ku/ui/features/provider/report/views/report_result_view.dart';
 
 class ReportView extends StatefulWidget {
   const ReportView({super.key});
@@ -26,18 +23,6 @@ class _ReportViewState extends State<ReportView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      bottomNavigationBar: Navbar(
-        currentIndex: 2,
-        items: Navbar.providerItems,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const BerandaView()),
-            );
-          }
-        },
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
@@ -341,10 +326,7 @@ class _ReportViewState extends State<ReportView> {
               size: 20,
             ),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ReportResultView()),
-              );
+              context.push('/provider/report/result');
             },
           ),
         ],
@@ -366,10 +348,7 @@ class _ReportViewState extends State<ReportView> {
         const Spacer(),
         GestureDetector(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ReportDetailsView()),
-            );
+            context.push('/provider/report/details');
           },
           child: const Text(
             'Lihat Semua',

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
-import 'package:servis_ku/core/widgets/navbar.dart';
-import 'package:servis_ku/ui/features/provider/report/views/report_view.dart';
-import 'package:servis_ku/ui/features/provider/profile/views/profile_view.dart';
 
 class BerandaView extends StatefulWidget {
   const BerandaView({super.key});
@@ -14,32 +11,11 @@ class BerandaView extends StatefulWidget {
 
 class _BerandaViewState extends State<BerandaView> {
   bool _isOnline = false;
-  int _currentNavIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      bottomNavigationBar: Navbar(
-        currentIndex: _currentNavIndex,
-        items: Navbar.providerItems,
-        onTap: (index) {
-          if (index == 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ReportView()),
-          if (index == 3) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileView()),
-            );
-          } else {
-            setState(() {
-              _currentNavIndex = index;
-            });
-          }
-        },
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),

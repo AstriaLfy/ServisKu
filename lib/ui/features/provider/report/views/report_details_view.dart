@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 
 class ReportDetailsView extends StatefulWidget {
@@ -48,7 +49,7 @@ class _ReportDetailsViewState extends State<ReportDetailsView> {
         Align(
           alignment: Alignment.centerLeft,
           child: GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () => context.pop(),
             child: Container(
               width: 40,
               height: 40,

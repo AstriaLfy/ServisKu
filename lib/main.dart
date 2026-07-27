@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:servis_ku/ui/features/auth/views/login_view.dart';
+import 'package:servis_ku/app/config/router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'ServisKu',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LoginView(),
+      routerConfig: appRouter,
     );
   }
 }

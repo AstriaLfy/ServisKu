@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
-import 'package:servis_ku/ui/features/auth/views/login_view.dart';
 
 class AccountView extends StatefulWidget {
   const AccountView({super.key});
@@ -37,7 +37,7 @@ class _AccountViewState extends State<AccountView> {
               Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => context.pop(),
                     child: Container(
                       width: 40,
                       height: 40,
@@ -148,11 +148,7 @@ class _AccountViewState extends State<AccountView> {
                   size: 20,
                 ),
                 onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginView()),
-                    (route) => false,
-                  );
+                  context.go('/login');
                 },
               ),
               const SizedBox(height: 12),

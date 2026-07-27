@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
@@ -120,6 +121,7 @@ class _RegisterViewState extends State<RegisterView> {
                       final password = _passwordController.text;
                       final confirmPassword = _passwordConfirmController.text;
                       debugPrint('Phone: $phone, Password: $password, Confirm: $confirmPassword');
+                      context.go('/login');
                     },
                   ),
                   const SizedBox(height: 24),
@@ -141,7 +143,7 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                Navigator.pop(context);
+                                context.pop();
                               },
                           ),
                         ],

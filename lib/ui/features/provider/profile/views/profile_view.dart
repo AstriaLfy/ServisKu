@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
-import 'package:servis_ku/core/widgets/navbar.dart';
-import 'package:servis_ku/ui/features/provider/profile/views/account_view.dart';
-import 'package:servis_ku/ui/features/provider/homepage/views/beranda_view.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -12,28 +10,10 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  int _currentNavIndex = 3;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      bottomNavigationBar: Navbar(
-        currentIndex: _currentNavIndex,
-        items: Navbar.providerItems,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const BerandaView()),
-            );
-          } else {
-            setState(() {
-              _currentNavIndex = index;
-            });
-          }
-        },
-      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,10 +348,7 @@ class _ProfileViewState extends State<ProfileView> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AccountView()),
-              );
+              context.push('/provider/account');
             },
             child: Container(
               height: 56,

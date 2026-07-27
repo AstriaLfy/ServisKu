@@ -1,10 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
-import 'package:servis_ku/ui/features/auth/views/register_view.dart';
-import 'package:servis_ku/ui/features/provider/homepage/views/beranda_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -115,10 +114,7 @@ class _LoginViewState extends State<LoginView> {
                       final phone = _phoneController.text;
                       final password = _passwordController.text;
                       debugPrint('Phone: $phone, Password: $password');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const BerandaView()),
-                      );
+                      context.go('/provider/beranda');
                     },
                   ),
                   const SizedBox(height: 24),
@@ -141,10 +137,7 @@ class _LoginViewState extends State<LoginView> {
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 debugPrint('Navigate to Register');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const RegisterView()),
-                                );
+                                context.push('/register');
                               },
                           ),
                         ],

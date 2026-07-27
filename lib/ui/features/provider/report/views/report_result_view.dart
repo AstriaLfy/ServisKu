@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 
 class ReportResultView extends StatelessWidget {
@@ -15,7 +16,6 @@ class ReportResultView extends StatelessWidget {
             children: [
               const Spacer(),
 
-              // Image Asset Success
               Image.asset(
                 'assets/images/success.png',
                 height: 160,
@@ -23,7 +23,6 @@ class ReportResultView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Title
               const Text(
                 'Pencairan Dana',
                 style: TextStyle(
@@ -42,7 +41,6 @@ class ReportResultView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // Subtitle
               const Text(
                 'Pengajuan pencairan dana sebesar\nRp4.250.000 telah berhasil dibuat',
                 textAlign: TextAlign.center,
@@ -54,7 +52,6 @@ class ReportResultView extends StatelessWidget {
               ),
               const SizedBox(height: 28),
 
-              // Details Container Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -98,11 +95,10 @@ class ReportResultView extends StatelessWidget {
 
               const Spacer(),
 
-              // Bottom Primary Button
               CustomButton(
                 text: 'Tutup',
                 onPressed: () {
-                  Navigator.pop(context);
+                  context.pop();
                 },
               ),
               const SizedBox(height: 8),
