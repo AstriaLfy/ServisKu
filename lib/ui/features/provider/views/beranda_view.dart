@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/navbar.dart';
+import 'package:servis_ku/ui/features/provider/order/views/order_view.dart';
 
 class BerandaView extends StatefulWidget {
   const BerandaView({super.key});
@@ -17,14 +18,20 @@ class _BerandaViewState extends State<BerandaView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       bottomNavigationBar: Navbar(
         currentIndex: _currentNavIndex,
         items: Navbar.providerItems,
         onTap: (index) {
-          setState(() {
-            _currentNavIndex = index;
-          });
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const OrderView()),
+            );
+          } else {
+            setState(() {
+              _currentNavIndex = index;
+            });
+          }
         },
       ),
       body: SafeArea(
@@ -50,10 +57,7 @@ class _BerandaViewState extends State<BerandaView> {
 
               _buildOrderMasukHeader(),
               const SizedBox(height: 12),
-              if (!_isOnline)
-                _buildEmptyOrderState()
-              else
-                _buildOrderList(),
+              if (!_isOnline) _buildEmptyOrderState() else _buildOrderList(),
               const SizedBox(height: 24),
             ],
           ),
@@ -85,10 +89,7 @@ class _BerandaViewState extends State<BerandaView> {
             SizedBox(height: 2),
             Text(
               'Mitra Profesional',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF6B7280),
-              ),
+              style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
             ),
           ],
         ),
@@ -105,10 +106,7 @@ class _BerandaViewState extends State<BerandaView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0xFFE5E7EB),
-                width: 1.5,
-              ),
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -117,7 +115,9 @@ class _BerandaViewState extends State<BerandaView> {
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _isOnline ? const Color(0xFF22C55E) : const Color(0xFF9CA3AF),
+                    color: _isOnline
+                        ? const Color(0xFF22C55E)
+                        : const Color(0xFF9CA3AF),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -127,7 +127,9 @@ class _BerandaViewState extends State<BerandaView> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: _isOnline ? const Color(0xFF22C55E) : const Color(0xFF6B7280),
+                    color: _isOnline
+                        ? const Color(0xFF22C55E)
+                        : const Color(0xFF6B7280),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -139,11 +141,15 @@ class _BerandaViewState extends State<BerandaView> {
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: _isOnline ? const Color(0xFF22C55E) : const Color(0xFFE5E7EB),
+                    color: _isOnline
+                        ? const Color(0xFF22C55E)
+                        : const Color(0xFFE5E7EB),
                   ),
                   child: AnimatedAlign(
                     duration: const Duration(milliseconds: 200),
-                    alignment: _isOnline ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: _isOnline
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: Container(
                       width: 16,
                       height: 16,
@@ -442,7 +448,10 @@ class _BerandaViewState extends State<BerandaView> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFDBEAFE),
                       borderRadius: BorderRadius.circular(10),
@@ -474,21 +483,33 @@ class _BerandaViewState extends State<BerandaView> {
             children: [
               Expanded(
                 child: _buildInfoTile(
-                  iconWidget: const Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
+                  iconWidget: const Icon(
+                    Icons.location_on_outlined,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   value: distance,
                   label: 'Jarak',
                 ),
               ),
               Expanded(
                 child: _buildInfoTile(
-                  iconWidget: Image.asset('assets/icons/wallet_icon.png', width: 14, height: 14),
+                  iconWidget: Image.asset(
+                    'assets/icons/wallet_icon.png',
+                    width: 14,
+                    height: 14,
+                  ),
                   value: price,
                   label: 'Estimasi Harga',
                 ),
               ),
               Expanded(
                 child: _buildInfoTile(
-                  iconWidget: const Icon(Icons.access_time, size: 16, color: AppColors.primary),
+                  iconWidget: const Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   value: estimatedTime,
                   label: 'Estimasi Waktu',
                 ),
@@ -564,10 +585,7 @@ class _BerandaViewState extends State<BerandaView> {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF6B7280),
-                ),
+                style: const TextStyle(fontSize: 10, color: Color(0xFF6B7280)),
               ),
             ],
           ),

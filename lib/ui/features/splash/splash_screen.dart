@@ -9,9 +9,9 @@ class AnimatedSplashScreenWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
-      duration: 3000,
+      duration: 1500,
       splashIconSize: double.infinity,
-      backgroundColor: Colors.black,
+      backgroundColor: Color(0xFF1D56CF),
       splash: ClipRect(
         child: SizedBox.expand(
           child: FittedBox(
