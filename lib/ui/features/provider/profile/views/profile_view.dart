@@ -18,25 +18,24 @@ class _ProfileViewState extends State<ProfileView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: double.infinity,
-              height: 180,
-              child: Opacity(
-                opacity: 0.35,
-                child: Image.asset(
-                  'assets/images/texture.png',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.bottomCenter,
+            Stack(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 180,
+                  child: Opacity(
+                    opacity: 0.35,
+                    child: Image.asset(
+                      'assets/images/texture.png',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.bottomCenter,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
+                const Positioned(
+                  left: 20,
+                  bottom: 16,
+                  child: Text(
                     'Toko',
                     style: TextStyle(
                       color: Color(0xFF111827),
@@ -45,8 +44,15 @@ class _ProfileViewState extends State<ProfileView> {
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                ),
+              ],
+            ),
 
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   _buildProfileTokoCard(),
                   const SizedBox(height: 16),
 
