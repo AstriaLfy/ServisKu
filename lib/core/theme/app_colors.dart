@@ -6,7 +6,7 @@ class AppColors {
   // Primary (Blue) Colors
   static const Color primary = Color(0xFF1E5EE6);
   static const Color primaryPressed = Color(0xFF1B4FA3);
-  static const Color primaryDisabled = Color(0xFF1E293B);
+  static const Color primaryDisabled = Color(0xFF93C5FD);
 
   // Danger (Red) Colors
   static const Color danger = Color(0xFFEF4444);
