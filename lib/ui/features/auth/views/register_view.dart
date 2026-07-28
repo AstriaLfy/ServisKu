@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
+import 'package:servis_ku/ui/features/auth/views/otp_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -23,6 +24,16 @@ class _RegisterViewState extends State<RegisterView> {
     _passwordController.dispose();
     _passwordConfirmController.dispose();
     super.dispose();
+  }
+
+  bool get _isFormValid {
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text;
+    final confirm = _passwordConfirmController.text;
+    return phone.isNotEmpty &&
+        password.isNotEmpty &&
+        confirm.isNotEmpty &&
+        password == confirm;
   }
 
   @override
@@ -77,6 +88,7 @@ class _RegisterViewState extends State<RegisterView> {
                     hintText: 'Nomor Telepon',
                     prefixIcon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
+                    onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 24),
                   
@@ -94,6 +106,7 @@ class _RegisterViewState extends State<RegisterView> {
                     hintText: 'Kata Sandi',
                     prefixIcon: Icons.lock_outline,
                     isPassword: true,
+                    onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 24),
 
@@ -111,18 +124,25 @@ class _RegisterViewState extends State<RegisterView> {
                     hintText: 'Kata Sandi',
                     prefixIcon: Icons.lock_outline,
                     isPassword: true,
+                    onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 36),
                   
                   CustomButton(
                     text: 'Register',
-                    onPressed: () {
-                      final phone = _phoneController.text;
-                      final password = _passwordController.text;
-                      final confirmPassword = _passwordConfirmController.text;
-                      debugPrint('Phone: $phone, Password: $password, Confirm: $confirmPassword');
-                      context.go('/login');
-                    },
+                    onPressed: _isFormValid
+                        ? () {
+                            final phone = _phoneController.text.trim();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OtpView(
+                                  phoneNumber: phone,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                   ),
                   const SizedBox(height: 24),
                   
@@ -143,7 +163,11 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                context.pop();
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go('/login');
+                                }
                               },
                           ),
                         ],

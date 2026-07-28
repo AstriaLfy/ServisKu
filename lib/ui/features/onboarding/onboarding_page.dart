@@ -61,10 +61,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: _goToPrevious,
-                      child: const Icon(Icons.arrow_back_ios_new, size: 18),
-                    ),
+                    if (_currentIndex > 0)
+                      GestureDetector(
+                        onTap: _goToPrevious,
+                        child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                      )
+                    else
+                      const SizedBox(width: 18),
                     const SizedBox(width: 12),
                     SizedBox(
                       width: 60,
@@ -99,10 +102,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   if (index == _welcomeIndex) {
                     return _WelcomePage(
                       onLogin: () {
-                        context.go('/login');
+                        context.push('/login');
                       },
                       onRegister: () {
-                        context.go('/register');
+                        context.push('/register');
                       },
                     );
                   }
