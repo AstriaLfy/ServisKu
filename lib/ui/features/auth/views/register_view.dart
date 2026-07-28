@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
@@ -147,8 +148,11 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                // Pop back to LoginView screen
-                                Navigator.pop(context);
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go('/login');
+                                }
                               },
                           ),
                         ],
