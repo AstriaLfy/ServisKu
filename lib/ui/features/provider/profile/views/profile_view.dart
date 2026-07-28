@@ -322,31 +322,36 @@ class _ProfileViewState extends State<ProfileView> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 56,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFBFDBFE)),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.engineering_outlined,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  'Layanan',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            onTap: () {
+              context.push('/provider/services');
+            },
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFBFDBFE)),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.engineering_outlined,
                     color: AppColors.primary,
+                    size: 22,
                   ),
-                ),
-              ],
+                  SizedBox(width: 8),
+                  Text(
+                    'Layanan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

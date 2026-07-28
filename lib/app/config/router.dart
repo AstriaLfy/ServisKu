@@ -11,6 +11,9 @@ import 'package:servis_ku/ui/features/provider/profile/views/profile_view.dart';
 import 'package:servis_ku/ui/features/provider/report/views/report_details_view.dart';
 import 'package:servis_ku/ui/features/provider/report/views/report_result_view.dart';
 import 'package:servis_ku/ui/features/provider/report/views/report_view.dart';
+import 'package:servis_ku/ui/features/provider/services/views/service_add_view.dart';
+import 'package:servis_ku/ui/features/provider/services/views/service_detail_view.dart';
+import 'package:servis_ku/ui/features/provider/services/views/service_view.dart';
 import 'package:servis_ku/ui/features/splash/splash_screen.dart';
 
 class MainShellScaffold extends StatelessWidget {
@@ -110,6 +113,21 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/provider/report/result',
       builder: (context, state) => const ReportResultView(),
+    ),
+    GoRoute(
+      path: '/provider/services',
+      builder: (context, state) => const ServiceView(),
+    ),
+    GoRoute(
+      path: '/provider/services/detail',
+      builder: (context, state) {
+        final item = state.extra as ServiceItemData?;
+        return ServiceDetailView(service: item);
+      },
+    ),
+    GoRoute(
+      path: '/provider/services/add',
+      builder: (context, state) => const ServiceAddView(),
     ),
   ],
 );
