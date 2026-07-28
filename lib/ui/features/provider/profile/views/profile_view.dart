@@ -18,25 +18,24 @@ class _ProfileViewState extends State<ProfileView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: double.infinity,
-              height: 180,
-              child: Opacity(
-                opacity: 0.35,
-                child: Image.asset(
-                  'assets/images/texture.png',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.bottomCenter,
+            Stack(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 180,
+                  child: Opacity(
+                    opacity: 0.35,
+                    child: Image.asset(
+                      'assets/images/texture.png',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.bottomCenter,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
+                const Positioned(
+                  left: 20,
+                  bottom: 16,
+                  child: Text(
                     'Toko',
                     style: TextStyle(
                       color: Color(0xFF111827),
@@ -45,8 +44,15 @@ class _ProfileViewState extends State<ProfileView> {
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                ),
+              ],
+            ),
 
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   _buildProfileTokoCard(),
                   const SizedBox(height: 16),
 
@@ -316,31 +322,36 @@ class _ProfileViewState extends State<ProfileView> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 56,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFBFDBFE)),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.engineering_outlined,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  'Layanan',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            onTap: () {
+              context.push('/provider/services');
+            },
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFBFDBFE)),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.engineering_outlined,
                     color: AppColors.primary,
+                    size: 22,
                   ),
-                ),
-              ],
+                  SizedBox(width: 8),
+                  Text(
+                    'Layanan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
