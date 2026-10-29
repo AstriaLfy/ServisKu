@@ -29,7 +29,6 @@ class _RegisterNameViewState extends State<RegisterNameView> {
         top: false,
         child: Column(
           children: [
-            // Top texture banner
             SizedBox(
               width: double.infinity,
               height: 180,
@@ -42,7 +41,6 @@ class _RegisterNameViewState extends State<RegisterNameView> {
                 ),
               ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -59,7 +57,6 @@ class _RegisterNameViewState extends State<RegisterNameView> {
                       ),
                     ),
                     const SizedBox(height: 32),
-
                     const Text(
                       'Siapakah namamu?',
                       style: TextStyle(
@@ -69,7 +66,6 @@ class _RegisterNameViewState extends State<RegisterNameView> {
                       ),
                     ),
                     const SizedBox(height: 8),
-
                     CustomTextField(
                       controller: _nameController,
                       hintText: 'Masukkan nama kamu',
@@ -79,9 +75,7 @@ class _RegisterNameViewState extends State<RegisterNameView> {
                         setState(() {});
                       },
                     ),
-
                     const Spacer(),
-
                     CustomButton(
                       text: 'Lanjut',
                       onPressed: _isNameValid
@@ -89,7 +83,9 @@ class _RegisterNameViewState extends State<RegisterNameView> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RegisterRoleView(),
+                                  builder: (context) => RegisterRoleView(
+                                    fullName: _nameController.text.trim(),
+                                  ),
                                 ),
                               );
                             }

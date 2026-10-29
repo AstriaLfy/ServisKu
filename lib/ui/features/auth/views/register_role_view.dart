@@ -4,7 +4,12 @@ import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/ui/features/auth/views/register_all_set_view.dart';
 
 class RegisterRoleView extends StatefulWidget {
-  const RegisterRoleView({super.key});
+  final String fullName;
+
+  const RegisterRoleView({
+    super.key,
+    this.fullName = '',
+  });
 
   @override
   State<RegisterRoleView> createState() => _RegisterRoleViewState();
@@ -21,7 +26,6 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
         top: false,
         child: Column(
           children: [
-            // Top texture banner
             SizedBox(
               width: double.infinity,
               height: 180,
@@ -34,7 +38,6 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
                 ),
               ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -51,7 +54,6 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-
                     const Text(
                       'Pemilik jasa? atau pengguna jasa?',
                       style: TextStyle(
@@ -61,8 +63,6 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Role cards row
                     Row(
                       children: [
                         Expanded(
@@ -94,9 +94,7 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
                         ),
                       ],
                     ),
-
                     const Spacer(),
-
                     CustomButton(
                       text: 'Lanjut',
                       onPressed: _selectedRole != null
@@ -105,6 +103,7 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => RegisterAllSetView(
+                                    fullName: widget.fullName,
                                     selectedRole: _selectedRole,
                                   ),
                                 ),
@@ -156,7 +155,6 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
           borderRadius: BorderRadius.circular(23),
           child: Column(
             children: [
-              // Top illustration area
               Container(
                 width: double.infinity,
                 height: 170,
@@ -167,8 +165,6 @@ class _RegisterRoleViewState extends State<RegisterRoleView> {
                   fit: BoxFit.contain,
                 ),
               ),
-
-              // Bottom label container
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
+import 'package:servis_ku/ui/features/auth/bloc/auth_bloc.dart';
 import 'package:servis_ku/ui/features/auth/views/register_name_view.dart';
 
 class OtpView extends StatefulWidget {
@@ -89,158 +91,183 @@ class _OtpViewState extends State<OtpView> {
     final displayPhone =
         widget.phoneNumber.trim().isEmpty ? '+62–812–3456–7890' : widget.phoneNumber;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            // Top texture banner
-            SizedBox(
-              width: double.infinity,
-              height: 180,
-              child: Opacity(
-                opacity: 0.35,
-                child: Image.asset(
-                  'assets/images/texture.png',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.bottomCenter,
-                ),
-              ),
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red.shade700,
             ),
+          );
+        } else if (state is OtpSent) {
+          _startTimer();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Kode OTP telah dikirim ulang'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else if (state is ProfileSetupRequired) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const RegisterNameView(),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
 
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Konfirmasi OTP',
-                      style: TextStyle(
-                        color: Color(0xFF111827),
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 180,
+                  child: Opacity(
+                    opacity: 0.35,
+                    child: Image.asset(
+                      'assets/images/texture.png',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.bottomCenter,
                     ),
-                    const SizedBox(height: 16),
-
-                    Text(
-                      'OTP telah dikirimkan ke $displayPhone',
-                      style: const TextStyle(
-                        color: Color(0xFF1F2937),
-                        fontSize: 16,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    Center(
-                      child: Text(
-                        _formattedTimer,
-                        style: const TextStyle(
-                          color: Color(0xFF1F2937),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // 6 OTP Box Inputs
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(6, (index) {
-                        final isFilled = _controllers[index].text.isNotEmpty;
-                        final isFocused = _focusNodes[index].hasFocus;
-
-                        return Container(
-                          width: 48,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isFocused
-                                  ? const Color(0xFF1E5EE6)
-                                  : (isFilled
-                                      ? const Color(0xFFBFDBFE)
-                                      : Colors.transparent),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Center(
-                            child: TextField(
-                              controller: _controllers[index],
-                              focusNode: _focusNodes[index],
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              maxLength: 1,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF111827),
-                              ),
-                              decoration: const InputDecoration(
-                                counterText: '',
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              onChanged: (val) => _onDigitChanged(index, val),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 28),
-
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          _startTimer();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Kode OTP telah dikirim ulang'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Kirim ulang kode?',
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Konfirmasi OTP',
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.underline,
                             color: Color(0xFF111827),
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                      ),
-                    ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'OTP telah dikirimkan ke $displayPhone',
+                          style: const TextStyle(
+                            color: Color(0xFF1F2937),
+                            fontSize: 16,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Center(
+                          child: Text(
+                            _formattedTimer,
+                            style: const TextStyle(
+                              color: Color(0xFF1F2937),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: List.generate(6, (index) {
+                            final isFilled = _controllers[index].text.isNotEmpty;
+                            final isFocused = _focusNodes[index].hasFocus;
 
-                    const Spacer(),
-
-                    CustomButton(
-                      text: 'Konfirmasi',
-                      onPressed: _isOtpComplete
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RegisterNameView(),
+                            return Container(
+                              width: 48,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEFF6FF),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isFocused
+                                      ? const Color(0xFF1E5EE6)
+                                      : (isFilled
+                                          ? const Color(0xFFBFDBFE)
+                                          : Colors.transparent),
+                                  width: 1.5,
                                 ),
-                              );
-                            }
-                          : null,
+                              ),
+                              child: Center(
+                                child: TextField(
+                                  controller: _controllers[index],
+                                  focusNode: _focusNodes[index],
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  maxLength: 1,
+                                  enabled: !isLoading,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF111827),
+                                  ),
+                                  decoration: const InputDecoration(
+                                    counterText: '',
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                  onChanged: (val) => _onDigitChanged(index, val),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 28),
+                        Center(
+                          child: GestureDetector(
+                            onTap: (_secondsRemaining > 0 || isLoading)
+                                ? null
+                                : () {
+                                    context.read<AuthBloc>().add(
+                                          const OtpResendRequested(),
+                                        );
+                                  },
+                            child: Text(
+                              _secondsRemaining > 0
+                                  ? 'Kirim ulang dalam ${_secondsRemaining}s'
+                                  : 'Kirim ulang kode?',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                                color: (_secondsRemaining > 0 || isLoading)
+                                    ? const Color(0xFF9CA3AF)
+                                    : const Color(0xFF111827),
+                            ),
+                          ),
+                        ),
+                        ),
+                        Spacer(),
+                        CustomButton(
+                          text: 'Konfirmasi',
+                          isLoading: isLoading,
+                          onPressed: (_isOtpComplete && !isLoading)
+                              ? () {
+                                  final otpCode =
+                                      _controllers.map((c) => c.text.trim()).join();
+                                  context.read<AuthBloc>().add(
+                                        OtpVerified(otpCode),
+                                      );
+                                }
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

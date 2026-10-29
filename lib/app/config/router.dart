@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/widgets/navbar.dart';
 import 'package:servis_ku/ui/features/auth/views/login_view.dart';
 import 'package:servis_ku/ui/features/auth/views/register_view.dart';
+import 'package:servis_ku/ui/features/customer/views/customer_home_page.dart';
 import 'package:servis_ku/ui/features/onboarding/onboarding_page.dart';
 import 'package:servis_ku/ui/features/provider/homepage/views/beranda_view.dart';
 import 'package:servis_ku/ui/features/provider/order/views/order_view.dart';
@@ -60,6 +61,12 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterView(),
+    ),
+
+    // Customer Home Route
+    GoRoute(
+      path: '/customer/home',
+      builder: (context, state) => const CustomerHomePage(),
     ),
 
     StatefulShellRoute.indexedStack(
