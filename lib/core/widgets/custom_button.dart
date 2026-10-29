@@ -65,7 +65,7 @@ class CustomButton extends StatelessWidget {
           } else {
             backgroundColor = baseActiveColor.withValues(alpha: 0.15);
           }
-          textColor = baseActiveColor.withValues(alpha: 0.3);
+          textColor = type == ButtonType.primary ? Colors.white : baseActiveColor.withValues(alpha: 0.3);
         } else {
           backgroundColor = baseActiveColor;
           textColor = baseTextColor;
