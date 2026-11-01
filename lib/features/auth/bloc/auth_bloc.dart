@@ -27,6 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<OtpResendRequested>(_onOtpResendRequested);
     on<OtpVerified>(_onOtpVerified);
     on<ProfileUpdateRequested>(_onProfileUpdateRequested);
+    on<UserProfileRefreshed>(_onUserProfileRefreshed);
     on<SignOutRequested>(_onSignOutRequested);
   }
 
@@ -182,6 +183,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthFailure(e.failure, e.message));
     } catch (_) {
       emit(AuthFailure(err.AuthFailure.unknown, err.AuthFailure.unknown.userMessage));
+    }
+  }
+
+  Future<void> _onUserProfileRefreshed(
+    UserProfileRefreshed event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state is AuthSuccess) {
+      final current = (state as AuthSuccess).user;
+      if (event.newFullName != null && event.newFullName!.isNotEmpty) {
+        emit(AuthSuccess(user: current.copyWith(fullName: event.newFullName)));
+      } else {
+        try {
+          final refreshed = await _authRepository.getCurrentUser();
+          if (refreshed != null) {
+            emit(AuthSuccess(user: refreshed));
+          }
+        } catch (_) {}
+      }
     }
   }
 

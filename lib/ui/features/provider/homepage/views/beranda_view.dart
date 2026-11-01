@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
+import 'package:servis_ku/ui/features/auth/bloc/auth_bloc.dart';
 
 class BerandaView extends StatefulWidget {
   const BerandaView({super.key});
@@ -57,23 +59,30 @@ class _BerandaViewState extends State<BerandaView> {
           child: const Icon(Icons.person, color: Colors.white, size: 26),
         ),
         const SizedBox(width: 12),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Halo, Jason',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF111827),
-              ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              'Mitra Profesional',
-              style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
-            ),
-          ],
+        BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            final name = (state is AuthSuccess && state.user.fullName.isNotEmpty)
+                ? state.user.fullName
+                : 'Mitra';
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Halo, $name',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Mitra Profesional',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                ),
+              ],
+            );
+          },
         ),
         const Spacer(),
 

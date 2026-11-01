@@ -12,6 +12,7 @@ import 'package:servis_ku/ui/features/provider/profile/views/profile_view.dart';
 import 'package:servis_ku/ui/features/provider/report/views/report_details_view.dart';
 import 'package:servis_ku/ui/features/provider/report/views/report_result_view.dart';
 import 'package:servis_ku/ui/features/provider/report/views/report_view.dart';
+import 'package:servis_ku/ui/features/provider/services/domain/service_item.dart';
 import 'package:servis_ku/ui/features/provider/services/views/service_add_view.dart';
 import 'package:servis_ku/ui/features/provider/services/views/service_detail_view.dart';
 import 'package:servis_ku/ui/features/provider/services/views/service_view.dart';
@@ -128,13 +129,16 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/provider/services/detail',
       builder: (context, state) {
-        final item = state.extra as ServiceItemData?;
+        final item = state.extra as ServiceItem?;
         return ServiceDetailView(service: item);
       },
     ),
     GoRoute(
       path: '/provider/services/add',
-      builder: (context, state) => const ServiceAddView(),
+      builder: (context, state) {
+        final item = state.extra as ServiceItem?;
+        return ServiceAddView(editItem: item);
+      },
     ),
   ],
 );

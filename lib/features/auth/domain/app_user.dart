@@ -26,6 +26,20 @@ class AppUser extends Equatable {
     );
   }
 
+  AppUser copyWith({
+    String? id,
+    String? phone,
+    String? fullName,
+    UserRole? role,
+  }) {
+    return AppUser(
+      id: id ?? this.id,
+      phone: phone ?? this.phone,
+      fullName: fullName ?? this.fullName,
+      role: role ?? this.role,
+    );
+  }
+
   @override
   List<Object?> get props => [id, phone, fullName, role];
 }

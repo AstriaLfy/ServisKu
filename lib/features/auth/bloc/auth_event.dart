@@ -69,6 +69,16 @@ class ProfileUpdateRequested extends AuthEvent {
   List<Object?> get props => [fullName, role];
 }
 
+/// Perbarui data pengguna di state auth (misal setelah nama toko diupdate)
+class UserProfileRefreshed extends AuthEvent {
+  final String? newFullName;
+
+  const UserProfileRefreshed({this.newFullName});
+
+  @override
+  List<Object?> get props => [newFullName];
+}
+
 /// Keluar dari sesi aplikasi
 class SignOutRequested extends AuthEvent {
   const SignOutRequested();
