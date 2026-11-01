@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:servis_ku/data/models/order_model.dart';
+import '../../ui/features/provider/order/domain/order_helper.dart';
 
 class StatusTimeline extends StatelessWidget {
-  final List<StatusHistoryItem> items;
+  final List<OrderTimelineStep> items;
 
   const StatusTimeline({super.key, required this.items});
 
@@ -16,8 +16,8 @@ class StatusTimeline extends StatelessWidget {
         final Color dotColor = item.isCancelled
             ? const Color(0xFFDC2626)
             : item.isDone
-            ? const Color(0xFF1D56CF)
-            : const Color(0xFFD1D5DB);
+                ? const Color(0xFF1D56CF)
+                : const Color(0xFFD1D5DB);
 
         return IntrinsicHeight(
           child: Row(

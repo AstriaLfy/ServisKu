@@ -1,88 +1,243 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
+import 'package:servis_ku/core/utils/currency_formatter.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/detail_info_card.dart';
 import 'package:servis_ku/core/widgets/status_timeline.dart';
-import 'package:servis_ku/data/models/order_model.dart';
-import 'package:servis_ku/ui/features/provider/order/bloc/order_cubit.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../bloc/order_detail_cubit.dart';
+import '../bloc/order_detail_state.dart';
+import '../domain/order_entity.dart';
+import '../domain/order_helper.dart';
+import '../domain/order_status.dart';
 
-class OrderDetailView extends StatelessWidget {
-  final OrderModel order;
+class OrderDetailView extends StatefulWidget {
+  final OrderEntity order;
 
   const OrderDetailView({super.key, required this.order});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      body: SafeArea(
-        child: Column(
+  State<OrderDetailView> createState() => _OrderDetailViewState();
+}
+
+class _OrderDetailViewState extends State<OrderDetailView> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<OrderDetailCubit>().loadOrderDetail(widget.order.id);
+  }
+
+  Future<void> _makePhoneCall(String? phone) async {
+    if (phone == null || phone.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nomor telepon tidak tersedia')),
+      );
+      return;
+    }
+
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phone.replaceAll(RegExp(r'\s+'), ''),
+    );
+
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tidak dapat membuka aplikasi telepon')),
+        );
+      }
+    }
+  }
+
+  void _showChatPlaceholder() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Fitur chat segera hadir')),
+    );
+  }
+
+  void _showRejectDialog(BuildContext context, OrderDetailCubit cubit) {
+    final reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Tolak Order'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTopBar(context),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInfoPelanggan(),
-                    const SizedBox(height: 16),
-                    _buildInfoJasa(),
-                    const SizedBox(height: 16),
-                    if (order.customerNote != null &&
-                        order.customerNote!.isNotEmpty) ...[
-                      DetailInfoCard(
-                        title: 'Catatan Pelanggan',
-                        child: Text(
-                          order.customerNote!,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF374151),
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    _buildHargaEstimasi(),
-                    const SizedBox(height: 16),
-                    DetailInfoCard(
-                      title: 'Riwayat Status',
-                      child: StatusTimeline(items: order.statusHistory),
-                    ),
-                    if (order.status == OrderStatus.selesai &&
-                        order.orderRating != null) ...[
-                      const SizedBox(height: 16),
-                      _buildRatingCard(),
-                    ],
-                    if (order.status == OrderStatus.dibatalkan &&
-                        order.cancellationReason != null) ...[
-                      const SizedBox(height: 16),
-                      DetailInfoCard(
-                        title: 'Alasan Pembatalan',
-                        child: Text(
-                          order.cancellationReason!,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF374151),
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+            const Text(
+              'Masukkan alasan penolakan (opsional):',
+              style: TextStyle(fontSize: 13, color: Color(0xFF4B5563)),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Contoh: Sedang penuh, di luar jangkauan...',
+                hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
                 ),
+                contentPadding: const EdgeInsets.all(12),
               ),
             ),
-            _buildBottomActions(context),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Batal', style: TextStyle(color: Color(0xFF6B7280))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Navigator.pop(dialogCtx);
+              cubit.rejectOrder(reasonController.text);
+            },
+            child: const Text('Tolak Order', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
+  void _showCompleteDialog(BuildContext context, OrderDetailCubit cubit) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Selesaikan Order'),
+        content: const Text(
+          'Pastikan pekerjaan telah selesai dilakukan sebelum menyelesaikan order.',
+          style: TextStyle(fontSize: 13, color: Color(0xFF4B5563)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Batal', style: TextStyle(color: Color(0xFF6B7280))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Navigator.pop(dialogCtx);
+              cubit.completeOrder();
+            },
+            child: const Text('Ya, Selesaikan', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<OrderDetailCubit, OrderDetailState>(
+      listener: (context, state) {
+        if (state is OrderDetailLoaded) {
+          if (state.successMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.successMessage!)),
+            );
+          }
+          if (state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.errorMessage!)),
+            );
+          }
+        }
+      },
+      builder: (context, state) {
+        final order = state is OrderDetailLoaded ? state.order : widget.order;
+        final isActionInProgress = state is OrderDetailLoaded && state.isActionInProgress;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF9FAFB),
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildTopBar(context, order),
+                Expanded(
+                  child: state is OrderDetailLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInfoPelanggan(order),
+                              const SizedBox(height: 16),
+                              _buildInfoJasa(order),
+                              if (order.customerNote != null &&
+                                  order.customerNote!.isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                DetailInfoCard(
+                                  title: 'Catatan Pelanggan',
+                                  child: Text(
+                                    order.customerNote!,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF374151),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              _buildHargaEstimasi(order),
+                              const SizedBox(height: 16),
+                              DetailInfoCard(
+                                title: 'Riwayat Status',
+                                child: StatusTimeline(
+                                  items: OrderHelper.buildTimeline(order),
+                                ),
+                              ),
+                              if (order.status == OrderStatus.completed &&
+                                  order.rating != null) ...[
+                                const SizedBox(height: 16),
+                                _buildRatingCard(order),
+                              ],
+                              if ((order.status == OrderStatus.rejected ||
+                                      order.status == OrderStatus.cancelled) &&
+                                  order.cancellationReason != null) ...[
+                                const SizedBox(height: 16),
+                                DetailInfoCard(
+                                  title: 'Alasan Pembatalan',
+                                  child: Text(
+                                    order.cancellationReason!,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF374151),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                ),
+                _buildBottomActions(context, order, isActionInProgress),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTopBar(BuildContext context, OrderEntity order) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       child: Column(
@@ -121,7 +276,7 @@ class OrderDetailView extends StatelessWidget {
           Row(
             children: [
               Text(
-                '#${order.id}',
+                '#${order.id.length > 8 ? order.id.substring(0, 8) : order.id}',
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -151,7 +306,7 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoPelanggan() {
+  Widget _buildInfoPelanggan(OrderEntity order) {
     return DetailInfoCard(
       title: 'Info Pelanggan',
       child: Row(
@@ -175,29 +330,25 @@ class OrderDetailView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.star_rounded,
-                      size: 14,
-                      color: Color(0xFFFBBF24),
-                    ),
-                    const SizedBox(width: 2),
-                    Text(
-                      '${order.customerRating} (${order.customerRatingCount} ulasan)',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
-                  ],
+                Text(
+                  order.customerPhone ?? '-',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF6B7280),
+                  ),
                 ),
               ],
             ),
           ),
-          _circleIconButton(Icons.call_outlined, () {}),
+          _circleIconButton(
+            Icons.call_outlined,
+            () => _makePhoneCall(order.customerPhone),
+          ),
           const SizedBox(width: 8),
-          _circleIconButton(Icons.chat_bubble_outline, () {}),
+          _circleIconButton(
+            Icons.chat_bubble_outline,
+            _showChatPlaceholder,
+          ),
         ],
       ),
     );
@@ -218,7 +369,7 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoJasa() {
+  Widget _buildInfoJasa(OrderEntity order) {
     return DetailInfoCard(
       title: 'Info Jasa',
       child: Column(
@@ -244,44 +395,71 @@ class OrderDetailView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.location_on_outlined,
-                size: 16,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  order.serviceAddress,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
-                    height: 1.4,
+          if (order.customerAddress != null && order.customerAddress!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    order.customerAddress!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6B7280),
+                      height: 1.4,
+                    ),
                   ),
                 ),
+              ],
+            ),
+          ],
+          if (order.items.isNotEmpty) ...[
+            const Divider(height: 20, color: Color(0xFFE5E7EB)),
+            ...order.items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${item.serviceName} x${item.quantity}',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF374151)),
+                    ),
+                    Text(
+                      CurrencyFormatter.format(item.totalPrice),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF111827),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildHargaEstimasi() {
+  Widget _buildHargaEstimasi(OrderEntity order) {
     return DetailInfoCard(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Harga Estimasi',
-            style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+          Text(
+            order.totalPrice != null ? 'Total Harga' : 'Harga Estimasi',
+            style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
           ),
           Text(
-            order.price,
+            CurrencyFormatter.format(order.effectivePrice),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -293,53 +471,57 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildRatingCard() {
+  Widget _buildRatingCard(OrderEntity order) {
     return DetailInfoCard(
       title: 'Rating dari Pelanggan',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              ...List.generate(5, (index) {
-                final filled = index < (order.orderRating ?? 0).round();
-                return Icon(
-                  filled ? Icons.star_rounded : Icons.star_border_rounded,
-                  size: 20,
-                  color: const Color(0xFFFBBF24),
-                );
-              }),
-              const SizedBox(width: 8),
-              Text(
-                order.orderRating!.toStringAsFixed(1),
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF111827),
-                ),
-              ),
-            ],
-          ),
-          if (order.reviewText != null && order.reviewText!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              order.reviewText!,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF374151),
-                height: 1.4,
-              ),
+          ...List.generate(5, (index) {
+            final filled = index < (order.rating ?? 0).round();
+            return Icon(
+              filled ? Icons.star_rounded : Icons.star_border_rounded,
+              size: 20,
+              color: const Color(0xFFFBBF24),
+            );
+          }),
+          const SizedBox(width: 8),
+          Text(
+            order.rating!.toStringAsFixed(1),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF111827),
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomActions(BuildContext context) {
-    // Selesai & Dibatalkan gak butuh tombol aksi apa-apa
-    if (order.status == OrderStatus.selesai ||
-        order.status == OrderStatus.dibatalkan) {
+  Widget _buildBottomActions(
+      BuildContext context, OrderEntity order, bool isActionInProgress) {
+    final cubit = context.read<OrderDetailCubit>();
+
+    if (order.status == OrderStatus.completed) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+        ),
+        child: SafeArea(
+          top: false,
+          child: CustomButton(
+            text: 'Kembali',
+            height: 46,
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+      );
+    }
+
+    if (order.status == OrderStatus.rejected ||
+        order.status == OrderStatus.cancelled) {
       return const SizedBox.shrink();
     }
 
@@ -351,7 +533,7 @@ class OrderDetailView extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: order.status == OrderStatus.baru
+        child: order.status == OrderStatus.pending
             ? Row(
                 children: [
                   Expanded(
@@ -359,21 +541,20 @@ class OrderDetailView extends StatelessWidget {
                       text: 'Tolak',
                       variant: ButtonVariant.outlined,
                       height: 46,
-                      onPressed: () {
-                        context.read<OrderCubit>().rejectOrder(order.id);
-                        Navigator.pop(context);
-                      },
+                      onPressed: isActionInProgress
+                          ? null
+                          : () => _showRejectDialog(context, cubit),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: CustomButton(
-                      text: 'Terima',
+                      text: 'Terima Order',
                       height: 46,
-                      onPressed: () {
-                        context.read<OrderCubit>().acceptOrder(order.id);
-                        Navigator.pop(context);
-                      },
+                      isLoading: isActionInProgress,
+                      onPressed: isActionInProgress
+                          ? null
+                          : () => cubit.acceptOrder(),
                     ),
                   ),
                 ],
@@ -385,7 +566,7 @@ class OrderDetailView extends StatelessWidget {
                       text: 'Chat Pelanggan',
                       variant: ButtonVariant.outlined,
                       height: 46,
-                      onPressed: () {},
+                      onPressed: _showChatPlaceholder,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -393,10 +574,10 @@ class OrderDetailView extends StatelessWidget {
                     child: CustomButton(
                       text: 'Selesaikan Order',
                       height: 46,
-                      onPressed: () {
-                        context.read<OrderCubit>().completeOrder(order.id);
-                        Navigator.pop(context);
-                      },
+                      isLoading: isActionInProgress,
+                      onPressed: isActionInProgress
+                          ? null
+                          : () => _showCompleteDialog(context, cubit),
                     ),
                   ),
                 ],

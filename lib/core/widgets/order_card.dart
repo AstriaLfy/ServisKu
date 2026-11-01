@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:servis_ku/data/models/order_model.dart';
-import 'package:servis_ku/core/theme/app_colors.dart';
-import 'package:servis_ku/core/widgets/custom_button.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/utils/currency_formatter.dart';
+import '../../core/widgets/custom_button.dart';
+import '../../ui/features/provider/order/domain/order_entity.dart';
+import '../../ui/features/provider/order/domain/order_helper.dart';
+import '../../ui/features/provider/order/domain/order_status.dart';
 
 class OrderCard extends StatelessWidget {
-  final OrderModel order;
+  final OrderEntity order;
   final VoidCallback? onTap;
   final VoidCallback? onReject;
   final VoidCallback? onAccept;
+  final bool isActionLoading;
 
   const OrderCard({
     super.key,
@@ -15,10 +19,14 @@ class OrderCard extends StatelessWidget {
     this.onTap,
     this.onReject,
     this.onAccept,
+    this.isActionLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final showActions = order.status == OrderStatus.pending &&
+        (onReject != null || onAccept != null);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -95,7 +103,7 @@ class OrderCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      order.timeAgo,
+                      OrderHelper.formatRelativeTime(order.createdAt),
                       style: const TextStyle(
                         fontSize: 11,
                         color: Color(0xFF9CA3AF),
@@ -116,7 +124,7 @@ class OrderCard extends StatelessWidget {
                       size: 16,
                       color: AppColors.primary,
                     ),
-                    value: order.distance,
+                    value: order.distanceKm != null ? '${order.distanceKm} km' : '-',
                     label: 'Jarak',
                   ),
                 ),
@@ -127,7 +135,7 @@ class OrderCard extends StatelessWidget {
                       width: 14,
                       height: 14,
                     ),
-                    value: order.price,
+                    value: CurrencyFormatter.format(order.estimatedPrice),
                     label: 'Estimasi Harga',
                   ),
                 ),
@@ -138,14 +146,16 @@ class OrderCard extends StatelessWidget {
                       size: 16,
                       color: AppColors.primary,
                     ),
-                    value: order.estimatedTime,
+                    value: order.estimatedMinutes != null
+                        ? '${order.estimatedMinutes} mnt'
+                        : '-',
                     label: 'Estimasi Waktu',
                   ),
                 ),
               ],
             ),
 
-            if (onReject != null || onAccept != null) ...[
+            if (showActions) ...[
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -156,7 +166,7 @@ class OrderCard extends StatelessWidget {
                         variant: ButtonVariant.outlined,
                         height: 42,
                         borderRadius: 24,
-                        onPressed: onReject,
+                        onPressed: isActionLoading ? null : onReject,
                       ),
                     ),
                   if (onReject != null && onAccept != null)
@@ -167,7 +177,8 @@ class OrderCard extends StatelessWidget {
                         text: 'Terima',
                         height: 42,
                         borderRadius: 24,
-                        onPressed: onAccept,
+                        isLoading: isActionLoading,
+                        onPressed: isActionLoading ? null : onAccept,
                       ),
                     ),
                 ],

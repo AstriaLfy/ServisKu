@@ -1,38 +1,72 @@
 import 'package:equatable/equatable.dart';
-import 'package:servis_ku/data/models/order_model.dart';
+import '../domain/order_entity.dart';
+import '../domain/order_status.dart';
 
-enum OrderStatusType { initial, loading, success, failure }
+abstract class OrderState extends Equatable {
+  const OrderState();
 
-class OrderState extends Equatable {
-  final OrderStatusType status;
-  final List<OrderModel> allOrders;
+  @override
+  List<Object?> get props => [];
+}
+
+class OrderInitial extends OrderState {
+  const OrderInitial();
+}
+
+class OrderLoading extends OrderState {
+  const OrderLoading();
+}
+
+class OrderLoaded extends OrderState {
+  final List<OrderEntity> allOrders;
   final OrderFilter selectedFilter;
-  final String? errorMessage;
+  final String? actionInProgressId;
+  final String? snackbarMessage;
 
-  const OrderState({
-    this.status = OrderStatusType.initial,
-    this.allOrders = const [],
+  const OrderLoaded({
+    required this.allOrders,
     this.selectedFilter = OrderFilter.semua,
-    this.errorMessage,
+    this.actionInProgressId,
+    this.snackbarMessage,
   });
 
-  List<OrderModel> get filteredOrders =>
+  List<OrderEntity> get filteredOrders =>
       allOrders.where((o) => selectedFilter.matches(o.status)).toList();
 
-  OrderState copyWith({
-    OrderStatusType? status,
-    List<OrderModel>? allOrders,
+  OrderLoaded copyWith({
+    List<OrderEntity>? allOrders,
     OrderFilter? selectedFilter,
-    String? errorMessage,
+    String? actionInProgressId,
+    bool clearActionInProgress = false,
+    String? snackbarMessage,
+    bool clearSnackbar = false,
   }) {
-    return OrderState(
-      status: status ?? this.status,
+    return OrderLoaded(
       allOrders: allOrders ?? this.allOrders,
       selectedFilter: selectedFilter ?? this.selectedFilter,
-      errorMessage: errorMessage ?? this.errorMessage,
+      actionInProgressId: clearActionInProgress
+          ? null
+          : (actionInProgressId ?? this.actionInProgressId),
+      snackbarMessage: clearSnackbar
+          ? null
+          : (snackbarMessage ?? this.snackbarMessage),
     );
   }
 
   @override
-  List<Object?> get props => [status, allOrders, selectedFilter, errorMessage];
+  List<Object?> get props => [
+        allOrders,
+        selectedFilter,
+        actionInProgressId,
+        snackbarMessage,
+      ];
+}
+
+class OrderFailure extends OrderState {
+  final String message;
+
+  const OrderFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

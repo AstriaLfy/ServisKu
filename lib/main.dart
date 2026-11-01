@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:servis_ku/app/config/router.dart';
 import 'package:servis_ku/core/services/supabase_service.dart';
 import 'package:servis_ku/features/auth/bloc/auth_bloc.dart';
 import 'package:servis_ku/features/auth/data/auth_repository.dart';
+import 'package:servis_ku/ui/features/provider/order/bloc/order_cubit.dart';
+import 'package:servis_ku/ui/features/provider/order/data/order_repository.dart';
 import 'package:servis_ku/ui/features/provider/profile/bloc/shop_profile_bloc.dart';
 import 'package:servis_ku/ui/features/provider/profile/data/shop_profile_repository.dart';
 import 'package:servis_ku/ui/features/provider/services/bloc/services_bloc.dart';
@@ -11,6 +14,9 @@ import 'package:servis_ku/ui/features/provider/services/data/services_repository
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi locale bahasa Indonesia untuk format tanggal
+  await initializeDateFormatting('id_ID', null);
 
   // Inisialisasi Supabase dari environment (--dart-define-from-file=.env)
   await SupabaseService.initialize();
@@ -40,6 +46,11 @@ class MyApp extends StatelessWidget {
           create: (context) => ServicesBloc(
             repository: ServicesRepository(),
           )..add(const ServicesStarted()),
+        ),
+        BlocProvider<OrderCubit>(
+          create: (context) => OrderCubit(
+            orderRepository: SupabaseOrderRepository(),
+          ),
         ),
       ],
       child: MaterialApp.router(
