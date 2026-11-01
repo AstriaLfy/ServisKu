@@ -5,6 +5,8 @@ import 'package:servis_ku/app/config/router.dart';
 import 'package:servis_ku/core/services/supabase_service.dart';
 import 'package:servis_ku/features/auth/bloc/auth_bloc.dart';
 import 'package:servis_ku/features/auth/data/auth_repository.dart';
+import 'package:servis_ku/ui/features/provider/homepage/bloc/home_cubit.dart';
+import 'package:servis_ku/ui/features/provider/homepage/data/home_repository.dart';
 import 'package:servis_ku/ui/features/provider/order/bloc/order_cubit.dart';
 import 'package:servis_ku/ui/features/provider/order/data/order_repository.dart';
 import 'package:servis_ku/ui/features/provider/profile/bloc/shop_profile_bloc.dart';
@@ -35,6 +37,11 @@ class MyApp extends StatelessWidget {
           create: (context) => AuthBloc(
             authRepository: AuthRepository(),
           )..add(const AuthCheckRequested()),
+        ),
+        BlocProvider<HomeCubit>(
+          create: (context) => HomeCubit(
+            homeRepository: SupabaseHomeRepository(),
+          ),
         ),
         BlocProvider<ShopProfileBloc>(
           create: (context) => ShopProfileBloc(

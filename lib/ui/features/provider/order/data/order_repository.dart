@@ -6,11 +6,12 @@ import '../domain/order_entity.dart';
 abstract class OrderRepository {
   Future<String?> getShopId();
   Future<List<OrderEntity>> getOrders();
+  Future<List<OrderEntity>> getPendingOrders();
   Future<OrderEntity> getOrderDetail(String id);
   Future<void> acceptOrder(String id);
   Future<void> rejectOrder(String id, String? reason);
   Future<void> completeOrder(String id);
-  RealtimeChannel? watchOrders(String shopId, VoidCallback onDataChanged);
+  RealtimeChannel? watchOrders(String shopId, VoidCallback onDataChanged, {String? channelName});
 }
 
 class SupabaseOrderRepository implements OrderRepository {
@@ -76,6 +77,53 @@ class SupabaseOrderRepository implements OrderRepository {
       throw _mapPostgrestException(e);
     } catch (e) {
       debugPrint('[OrderRepository] getOrders general error: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<OrderEntity>> getPendingOrders() async {
+    final shopId = await getShopId();
+    if (shopId == null) return [];
+
+    try {
+      final res = await _client
+          .from('orders')
+          .select('''
+            id,
+            order_number,
+            customer_id,
+            shop_id,
+            service_summary,
+            estimated_price,
+            estimated_minutes,
+            distance_km,
+            address,
+            customer_note,
+            status,
+            reason,
+            rating,
+            review,
+            rated_at,
+            created_at,
+            updated_at,
+            customer:profiles!customer_id (
+              full_name,
+              phone
+            )
+          ''')
+          .eq('shop_id', shopId)
+          .eq('status', 'pending')
+          .order('created_at', ascending: false)
+          .limit(20);
+
+      final list = res as List<dynamic>;
+      return list.map((json) => OrderEntity.fromJson(json as Map<String, dynamic>)).toList();
+    } on PostgrestException catch (e) {
+      debugPrint('[OrderRepository] getPendingOrders error: ${e.message}');
+      throw _mapPostgrestException(e);
+    } catch (e) {
+      debugPrint('[OrderRepository] getPendingOrders general error: $e');
       rethrow;
     }
   }
@@ -168,9 +216,10 @@ class SupabaseOrderRepository implements OrderRepository {
   }
 
   @override
-  RealtimeChannel? watchOrders(String shopId, VoidCallback onDataChanged) {
+  RealtimeChannel? watchOrders(String shopId, VoidCallback onDataChanged, {String? channelName}) {
     try {
-      final channel = _client.channel('public:orders:shop_$shopId');
+      final name = channelName ?? 'public:orders:shop_$shopId';
+      final channel = _client.channel(name);
       channel.onPostgresChanges(
         event: PostgresChangeEvent.all,
         schema: 'public',
@@ -181,7 +230,7 @@ class SupabaseOrderRepository implements OrderRepository {
           value: shopId,
         ),
         callback: (payload) {
-          debugPrint('[OrderRepository Realtime] Order event: ${payload.eventType}');
+          debugPrint('[$name Realtime] Order event: ${payload.eventType}');
           onDataChanged();
         },
       ).subscribe();
