@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
+import 'package:servis_ku/ui/features/provider/report/bloc/report_cubit.dart';
+import 'package:servis_ku/ui/features/provider/report/bloc/report_state.dart';
+import 'package:servis_ku/ui/features/provider/report/views/report_widgets.dart';
 
 class ReportDetailsView extends StatefulWidget {
   const ReportDetailsView({super.key});
@@ -10,33 +14,55 @@ class ReportDetailsView extends StatefulWidget {
 }
 
 class _ReportDetailsViewState extends State<ReportDetailsView> {
-  String _selectedMonth = 'Juni 2026';
-  final List<String> _months = [
-    'Mei 2026',
-    'Juni 2026',
-    'Juli 2026',
-    'Agustus 2026',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final cubit = context.read<ReportCubit>();
+    if (cubit.state.status != ReportStatus.loaded) cubit.load();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              const SizedBox(height: 24),
+        child: BlocBuilder<ReportCubit, ReportState>(
+          builder: (context, state) {
+            final summary = state.summary;
 
-              _buildMonthDropdown(),
-              const SizedBox(height: 20),
-
-              _buildTransactionList(),
-            ],
-          ),
+            return RefreshIndicator(
+              onRefresh: () => context.read<ReportCubit>().load(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(context),
+                    const SizedBox(height: 24),
+                    ReportMonthDropdown(
+                      months: state.months,
+                      selected: state.selectedMonth,
+                      onChanged: context.read<ReportCubit>().selectMonth,
+                    ),
+                    const SizedBox(height: 20),
+                    if (state.status == ReportStatus.initial ||
+                        state.status == ReportStatus.loading)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 48),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (summary.transactions.isEmpty)
+                      ReportEmptyTransactions(monthLabel: summary.monthLabel)
+                    else
+                      ...summary.transactions.map(
+                        (transaction) => ReportTransactionTile(transaction: transaction),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -76,133 +102,6 @@ class _ReportDetailsViewState extends State<ReportDetailsView> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildMonthDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedMonth,
-          isDense: true,
-          isExpanded: true,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: Color(0xFF111827),
-            size: 24,
-          ),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedMonth = newValue;
-              });
-            }
-          },
-          items: _months.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_today_outlined,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF111827),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionList() {
-    return Column(
-      children: List.generate(5, (index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: Colors.grey[300],
-                child: const Icon(Icons.person, color: Colors.white, size: 26),
-              ),
-              const SizedBox(width: 14),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Rozanea',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF111827),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Pembersihan Rumah',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF6B7280),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: const [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 12,
-                        color: Color(0xFF6B7280),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Juni 2026 | 14.35',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const Spacer(),
-              const Text(
-                '+Rp85.000',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF22C55E),
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
     );
   }
 }

@@ -16,7 +16,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   // Simpan data sesi registrasi untuk resend OTP
   String? _lastPhone;
-  String? _lastPassword;
 
   AuthBloc({required AuthRepository authRepository})
       : _authRepository = authRepository,
@@ -72,15 +71,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     _lastPhone = formattedPhone;
-    _lastPassword = event.password;
 
     emit(const AuthLoading());
     try {
-      await _authRepository.registerWithPassword(
+      final needsOtp = await _authRepository.registerWithPassword(
         phone: formattedPhone,
         password: event.password,
       );
-      emit(OtpSent(phone: formattedPhone, mode: AuthMode.register));
+      if (needsOtp) {
+        emit(OtpSent(phone: formattedPhone, mode: AuthMode.register));
+      } else {
+        emit(const ProfileSetupRequired());
+      }
     } on AuthFailureException catch (e) {
       emit(AuthFailure(e.failure, e.message));
     } catch (_) {
@@ -119,7 +121,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     OtpResendRequested event,
     Emitter<AuthState> emit,
   ) async {
-    if (_lastPhone == null || _lastPassword == null) {
+    if (_lastPhone == null) {
       emit(const AuthFailure(
         err.AuthFailure.unknown,
         'Data sesi tidak ditemukan. Silakan ulangi pendaftaran.',
@@ -129,10 +131,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     emit(const AuthLoading());
     try {
-      await _authRepository.registerWithPassword(
-        phone: _lastPhone!,
-        password: _lastPassword!,
-      );
+      await _authRepository.resendRegistrationOtp(phone: _lastPhone!);
       emit(OtpSent(phone: _lastPhone!, mode: AuthMode.register));
     } on AuthFailureException catch (e) {
       emit(AuthFailure(e.failure, e.message));
@@ -213,7 +212,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authRepository.signOut();
       _lastPhone = null;
-      _lastPassword = null;
       emit(const Unauthenticated());
     } on AuthFailureException catch (e) {
       emit(AuthFailure(e.failure, e.message));

@@ -7,6 +7,7 @@ import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/core/widgets/custom_text_field.dart';
 import 'package:servis_ku/ui/features/auth/bloc/auth_bloc.dart';
 import 'package:servis_ku/ui/features/auth/views/otp_view.dart';
+import 'package:servis_ku/ui/features/auth/views/register_name_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -56,6 +57,14 @@ class _RegisterViewState extends State<RegisterView> {
               builder: (context) => OtpView(
                 phoneNumber: state.phone,
               ),
+            ),
+          );
+        } else if (state is ProfileSetupRequired &&
+            (ModalRoute.of(context)?.isCurrent ?? false)) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const RegisterNameView(),
             ),
           );
         }

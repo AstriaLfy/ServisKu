@@ -6,6 +6,7 @@ import 'package:servis_ku/core/utils/currency_formatter.dart';
 import 'package:servis_ku/core/widgets/custom_button.dart';
 import 'package:servis_ku/ui/features/provider/services/bloc/services_bloc.dart';
 import 'package:servis_ku/ui/features/provider/services/domain/service_item.dart';
+import 'package:servis_ku/ui/features/provider/services/views/service_photo.dart';
 
 class ServiceDetailView extends StatelessWidget {
   final ServiceItem? service;
@@ -126,19 +127,7 @@ class ServiceDetailView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Center(
-                            child: Container(
-                              width: 96,
-                              height: 96,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFEFF6FF),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.handyman_outlined,
-                                size: 48,
-                                color: AppColors.primary,
-                              ),
-                            ),
+                            child: ServicePhoto(imageUrl: item.photoUrl, size: 96),
                           ),
                           const SizedBox(height: 24),
 

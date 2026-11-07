@@ -64,14 +64,14 @@ class Navbar extends StatelessWidget {
       label: 'Beranda',
     ),
     NavItem(
-      icon: Icons.shopping_bag_outlined,
-      activeIcon: Icons.shopping_bag_rounded,
-      label: 'Order',
+      icon: Icons.receipt_long_outlined,
+      activeIcon: Icons.receipt_long_rounded,
+      label: 'Riwayat',
     ),
     NavItem(
       icon: Icons.person_outline_rounded,
       activeIcon: Icons.person_rounded,
-      label: 'Profil',
+      label: 'Akun',
     ),
   ];
 

@@ -14,6 +14,7 @@ class HomeCubit extends Cubit<HomeState> {
   RealtimeChannel? _subscription;
   Timer? _tickerTimer;
   String? _shopId;
+  String? _subscribedShopId;
 
   HomeCubit({HomeRepository? homeRepository})
       : _homeRepository = homeRepository ?? SupabaseHomeRepository(),
@@ -85,7 +86,10 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void _subscribeRealtime() {
-    if (_subscription != null || _shopId == null) return;
+    if (_shopId == null) return;
+    if (_subscription != null && _subscribedShopId == _shopId) return;
+    _subscription?.unsubscribe();
+    _subscribedShopId = _shopId;
     _subscription = _homeRepository.watchOrders(_shopId!, () {
       _silentRefresh();
     });

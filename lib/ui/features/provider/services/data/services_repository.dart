@@ -68,7 +68,7 @@ class ServicesRepository {
           .order('created_at', ascending: false);
 
       return (data as List)
-          .map((item) => ServiceItem.fromMap(item as Map<String, dynamic>))
+          .map((item) => _withPhotoUrl(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
       debugPrint('[Shop] getServices error: $e');
@@ -82,6 +82,7 @@ class ServicesRepository {
     required int categoryId,
     required String name,
     required int price,
+    String? photoFilePath,
   }) async {
     try {
       final user = _client.auth.currentUser;
@@ -114,7 +115,17 @@ class ServicesRepository {
           .select('*, service_categories(name)')
           .single();
 
-      return ServiceItem.fromMap(inserted);
+      final created = ServiceItem.fromMap(inserted);
+      if (photoFilePath == null) return created;
+
+      final photoPath = await _uploadServicePhoto(created.id, photoFilePath);
+      final updated = await _client
+          .from('services')
+          .update({'photo_path': photoPath})
+          .eq('id', created.id)
+          .select('*, service_categories(name)')
+          .single();
+      return _withPhotoUrl(updated);
     } catch (e) {
       debugPrint('[Shop] createService error: $e');
       if (e is ServicesException) rethrow;
@@ -129,6 +140,8 @@ class ServicesRepository {
     required int categoryId,
     required String name,
     required int price,
+    String? photoFilePath,
+    String? previousPhotoPath,
   }) async {
     try {
       debugPrint('[Shop] updateService id=$id, name=$name, price=$price, cat=$categoryId');
@@ -138,9 +151,14 @@ class ServicesRepository {
             'category_id': categoryId,
             'name': name.trim(),
             'price': price,
-            'updated_at': DateTime.now().toIso8601String(),
           })
           .eq('id', id);
+
+      if (photoFilePath != null) {
+        final photoPath = await _uploadServicePhoto(id, photoFilePath);
+        await _client.from('services').update({'photo_path': photoPath}).eq('id', id);
+        await _removeOldPhoto(previousPhotoPath);
+      }
     } catch (e) {
       debugPrint('[Shop] updateService error: $e');
       if (e is ServicesException) rethrow;
@@ -156,7 +174,6 @@ class ServicesRepository {
           .from('services')
           .update({
             'is_active': isActive,
-            'updated_at': DateTime.now().toIso8601String(),
           })
           .eq('id', id);
     } catch (e) {
@@ -174,8 +191,7 @@ class ServicesRepository {
       await _client
           .from('services')
           .update({
-            'deleted_at': DateTime.now().toIso8601String(),
-            'updated_at': DateTime.now().toIso8601String(),
+            'deleted_at': DateTime.now().toUtc().toIso8601String(),
           })
           .eq('id', id);
     } catch (e) {
@@ -185,8 +201,53 @@ class ServicesRepository {
     }
   }
 
+  ServiceItem _withPhotoUrl(Map<String, dynamic> map) {
+    final item = ServiceItem.fromMap(map);
+    final path = item.photoPath;
+    if (path == null || path.isEmpty) return item;
+    final rawUrl = _client.storage.from('shop-photos').getPublicUrl(path);
+    final updatedAt = map['updated_at'] != null
+        ? DateTime.tryParse(map['updated_at'].toString())?.millisecondsSinceEpoch
+        : null;
+    return item.copyWith(photoUrl: updatedAt == null ? rawUrl : '$rawUrl?v=$updatedAt');
+  }
+
+  Future<String> _uploadServicePhoto(String serviceId, String filePath) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const ServicesException('Sesi tidak ditemukan.');
+    }
+    final path = '${user.id}/services/$serviceId-${DateTime.now().millisecondsSinceEpoch}.jpg';
+    debugPrint('[Shop] uploadServicePhoto path=$path');
+    final bytes = await File(filePath).readAsBytes();
+    await _client.storage.from('shop-photos').uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(contentType: 'image/jpeg'),
+        );
+    return path;
+  }
+
+  Future<void> _removeOldPhoto(String? path) async {
+    final user = _client.auth.currentUser;
+    if (path == null || user == null || !path.startsWith('${user.id}/')) return;
+    try {
+      await _client.storage.from('shop-photos').remove([path]);
+    } catch (e) {
+      debugPrint('[Shop] removeOldPhoto error: $e');
+    }
+  }
+
   ServicesException _handleException(dynamic error) {
+    if (error is StorageException) {
+      debugPrint('[Shop] Services StorageException status=${error.statusCode}, msg=${error.message}');
+      return ServicesException('Gagal mengunggah foto layanan: ${error.message}');
+    }
+
     if (error is PostgrestException) {
+      if (error.code == 'PGRST204' || error.message.contains('photo_path')) {
+        return const ServicesException('Foto layanan belum didukung server. Hubungi admin ServisKu.');
+      }
       debugPrint('[Shop] Services PostgrestException code=${error.code}, msg=${error.message}');
       if (error.code == '42501' || error.message.toLowerCase().contains('permission denied')) {
         return const ServicesException('Anda tidak punya akses untuk aksi ini.');

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:servis_ku/core/theme/app_colors.dart';
+import 'package:servis_ku/core/widgets/custom_button.dart';
+import 'package:servis_ku/ui/features/auth/bloc/auth_bloc.dart';
 import 'package:servis_ku/ui/features/provider/profile/bloc/shop_profile_bloc.dart';
 import 'package:servis_ku/ui/features/provider/profile/domain/operating_hours_helper.dart';
 import 'package:servis_ku/ui/features/provider/profile/domain/shop_profile.dart';
@@ -36,147 +38,180 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ShopProfileBloc, ShopProfileState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is ShopProfileSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.primary,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        } else if (state is ShopProfileFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.danger,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        if (state is Unauthenticated) context.go('/login');
       },
-      builder: (context, state) {
-        if (state is ShopProfileLoading && state.shop == null) {
-          return const Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-          );
-        }
+      child: BlocConsumer<ShopProfileBloc, ShopProfileState>(
+        listener: (context, state) {
+          if (state is ShopProfileSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.primary,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          } else if (state is ShopProfileFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.danger,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is ShopProfileLoading && state.shop == null) {
+            return const Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            );
+          }
 
-        if (state is ShopProfileFailure && state.shop == null) {
+          if (state is ShopProfileFailure && state.shop == null) {
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: AppColors.danger,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF374151),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                        ),
+                        onPressed: () {
+                          context.read<ShopProfileBloc>().add(
+                            const ShopProfileStarted(),
+                          );
+                        },
+                        child: const Text(
+                          'Coba Lagi',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final shop = state.shop;
+          if (shop == null) {
+            return const Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            );
+          }
+
           return Scaffold(
             backgroundColor: Colors.white,
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
+            body: RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () async {
+                context.read<ShopProfileBloc>().add(const ShopProfileStarted());
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF374151),
-                      ),
+                    Stack(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: 180,
+                          child: Opacity(
+                            opacity: 0.35,
+                            child: Image.asset(
+                              'assets/images/texture.png',
+                              fit: BoxFit.cover,
+                              alignment: Alignment.bottomCenter,
+                            ),
+                          ),
+                        ),
+                        const Positioned(
+                          left: 20,
+                          bottom: 16,
+                          child: Text(
+                            'Toko',
+                            style: TextStyle(
+                              color: Color(0xFF111827),
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                      onPressed: () {
-                        context.read<ShopProfileBloc>().add(const ShopProfileStarted());
-                      },
-                      child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 16.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildProfileTokoCard(shop),
+                          const SizedBox(height: 16),
+
+                          _buildAreaLayananCard(shop),
+                          const SizedBox(height: 16),
+
+                          _buildJamOperasionalCard(shop),
+                          const SizedBox(height: 24),
+
+                          _buildActionButtons(),
+                          const SizedBox(height: 16),
+
+                          CustomButton(
+                            text: 'Logout',
+                            type: ButtonType.danger,
+                            variant: ButtonVariant.outlined,
+                            height: 52,
+                            prefixIcon: const Icon(
+                              Icons.logout,
+                              color: AppColors.danger,
+                              size: 20,
+                            ),
+                            onPressed: _showLogoutDialog,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
           );
-        }
-
-        final shop = state.shop;
-        if (shop == null) {
-          return const Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-          );
-        }
-
-        return Scaffold(
-          backgroundColor: Colors.white,
-          body: RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: () async {
-              context.read<ShopProfileBloc>().add(const ShopProfileStarted());
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Stack(
-                    children: [
-                      SizedBox(
-                        width: double.infinity,
-                        height: 180,
-                        child: Opacity(
-                          opacity: 0.35,
-                          child: Image.asset(
-                            'assets/images/texture.png',
-                            fit: BoxFit.cover,
-                            alignment: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                      const Positioned(
-                        left: 20,
-                        bottom: 16,
-                        child: Text(
-                          'Toko',
-                          style: TextStyle(
-                            color: Color(0xFF111827),
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildProfileTokoCard(shop),
-                        const SizedBox(height: 16),
-
-                        _buildAreaLayananCard(shop),
-                        const SizedBox(height: 16),
-
-                        _buildJamOperasionalCard(shop),
-                        const SizedBox(height: 24),
-
-                        _buildActionButtons(),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+        },
+      ),
     );
   }
 
@@ -233,7 +268,9 @@ class _ProfileViewState extends State<ProfileView> {
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
                           borderRadius: BorderRadius.circular(22),
-                          image: (shop.photoUrl != null && shop.photoUrl!.isNotEmpty)
+                          image:
+                              (shop.photoUrl != null &&
+                                  shop.photoUrl!.isNotEmpty)
                               ? DecorationImage(
                                   image: NetworkImage(shop.photoUrl!),
                                   fit: BoxFit.cover,
@@ -241,7 +278,11 @@ class _ProfileViewState extends State<ProfileView> {
                               : null,
                         ),
                         child: (shop.photoUrl == null || shop.photoUrl!.isEmpty)
-                            ? const Icon(Icons.storefront, color: Colors.grey, size: 40)
+                            ? const Icon(
+                                Icons.storefront,
+                                color: Colors.grey,
+                                size: 40,
+                              )
                             : null,
                       ),
                       Positioned(
@@ -284,7 +325,8 @@ class _ProfileViewState extends State<ProfileView> {
                           color: Color(0xFF111827),
                         ),
                       ),
-                      if (shop.tagline != null && shop.tagline!.trim().isNotEmpty) ...[
+                      if (shop.tagline != null &&
+                          shop.tagline!.trim().isNotEmpty) ...[
                         const SizedBox(height: 2),
                         Text(
                           shop.tagline!,
@@ -396,12 +438,15 @@ class _ProfileViewState extends State<ProfileView> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    (shop.serviceArea != null && shop.serviceArea!.trim().isNotEmpty)
+                    (shop.serviceArea != null &&
+                            shop.serviceArea!.trim().isNotEmpty)
                         ? shop.serviceArea!
                         : 'Belum diatur',
                     style: TextStyle(
                       fontSize: 13,
-                      color: (shop.serviceArea != null && shop.serviceArea!.trim().isNotEmpty)
+                      color:
+                          (shop.serviceArea != null &&
+                              shop.serviceArea!.trim().isNotEmpty)
                           ? const Color(0xFF6B7280)
                           : const Color(0xFF9CA3AF),
                     ),
@@ -409,11 +454,7 @@ class _ProfileViewState extends State<ProfileView> {
                 ],
               ),
             ),
-            const Icon(
-              Icons.edit_outlined,
-              size: 20,
-              color: Color(0xFF111827),
-            ),
+            const Icon(Icons.edit_outlined, size: 20, color: Color(0xFF111827)),
           ],
         ),
       ),
@@ -482,15 +523,20 @@ class _ProfileViewState extends State<ProfileView> {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         'Belum diatur',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF9CA3AF),
+                        ),
                       ),
                     )
                   : Column(
                       children: groups
-                          .map((g) => Padding(
-                                padding: const EdgeInsets.only(bottom: 6.0),
-                                child: _buildScheduleRow(g.dayRange, g.hoursText),
-                              ))
+                          .map(
+                            (g) => Padding(
+                              padding: const EdgeInsets.only(bottom: 6.0),
+                              child: _buildScheduleRow(g.dayRange, g.hoursText),
+                            ),
+                          )
                           .toList(),
                     ),
             ),
@@ -521,6 +567,42 @@ class _ProfileViewState extends State<ProfileView> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Konfirmasi Logout',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text('Apakah Anda yakin ingin keluar dari akun ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text(
+              'Batal',
+              style: TextStyle(color: Color(0xFF6B7280)),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              context.read<AuthBloc>().add(const SignOutRequested());
+            },
+            child: const Text('Keluar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
     );
   }
 

@@ -35,6 +35,8 @@ class ServiceItem extends Equatable {
   final int price; // bigint rupiah bulat
   final bool isActive;
   final DateTime? deletedAt;
+  final String? photoPath;
+  final String? photoUrl;
 
   const ServiceItem({
     required this.id,
@@ -45,6 +47,8 @@ class ServiceItem extends Equatable {
     required this.price,
     required this.isActive,
     this.deletedAt,
+    this.photoPath,
+    this.photoUrl,
   });
 
   factory ServiceItem.fromMap(
@@ -68,6 +72,7 @@ class ServiceItem extends Equatable {
       deletedAt: map['deleted_at'] != null
           ? DateTime.tryParse(map['deleted_at'].toString())
           : null,
+      photoPath: map['photo_path'] as String?,
     );
   }
 
@@ -80,6 +85,8 @@ class ServiceItem extends Equatable {
     int? price,
     bool? isActive,
     DateTime? deletedAt,
+    String? photoPath,
+    String? photoUrl,
   }) {
     return ServiceItem(
       id: id ?? this.id,
@@ -90,6 +97,8 @@ class ServiceItem extends Equatable {
       price: price ?? this.price,
       isActive: isActive ?? this.isActive,
       deletedAt: deletedAt ?? this.deletedAt,
+      photoPath: photoPath ?? this.photoPath,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 
@@ -103,5 +112,7 @@ class ServiceItem extends Equatable {
         price,
         isActive,
         deletedAt,
+        photoPath,
+        photoUrl,
       ];
 }

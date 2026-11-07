@@ -14,13 +14,14 @@ class AuthRepository {
 
   // ─── Register: phone + password → kirim OTP ────────────────────────────────
 
-  Future<void> registerWithPassword({
+  Future<bool> registerWithPassword({
     required String phone,
     required String password,
   }) async {
     try {
       debugPrint('[Auth] registerWithPassword: phone=$phone');
-      await _client.auth.signUp(phone: phone, password: password);
+      final response = await _client.auth.signUp(phone: phone, password: password);
+      return response.session == null;
     } catch (e) {
       debugPrint('[Auth] registerWithPassword error: $e');
       throw _handleException(e);
@@ -57,6 +58,17 @@ class AuthRepository {
   }
 
   // ─── Verifikasi OTP saat registrasi ────────────────────────────────────────
+
+  Future<void> resendRegistrationOtp({required String phone}) async {
+    try {
+      debugPrint('[Auth] resendRegistrationOtp: phone=$phone');
+      await _client.auth.resend(type: OtpType.sms, phone: phone);
+    } catch (e) {
+      debugPrint('[Auth] resendRegistrationOtp error: $e');
+      if (e is AuthFailureException) rethrow;
+      throw _handleException(e);
+    }
+  }
 
   Future<void> verifyRegistrationOtp({
     required String phone,
@@ -152,6 +164,7 @@ class AuthRepository {
       await _client.auth.signOut();
     } catch (e) {
       debugPrint('[Auth] signOut error: $e');
+      if (_client.auth.currentSession == null) return;
       throw _handleException(e);
     }
   }
@@ -214,6 +227,14 @@ class AuthRepository {
         return AuthFailureException(
           failure: AuthFailure.rateLimited,
           message: AuthFailure.rateLimited.userMessage,
+        );
+      }
+
+      if (code == 'sms_send_failed' ||
+          (message.contains('sms') && message.contains('send'))) {
+        return AuthFailureException(
+          failure: AuthFailure.smsProviderError,
+          message: AuthFailure.smsProviderError.userMessage,
         );
       }
 
