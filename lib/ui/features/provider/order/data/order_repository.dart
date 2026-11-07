@@ -10,6 +10,7 @@ abstract class OrderRepository {
   Future<OrderEntity> getOrderDetail(String id);
   Future<void> acceptOrder(String id);
   Future<void> rejectOrder(String id, String? reason);
+  Future<void> startOrder(String id);
   Future<void> completeOrder(String id);
   RealtimeChannel? watchOrders(String shopId, VoidCallback onDataChanged, {String? channelName});
 }
@@ -198,6 +199,17 @@ class SupabaseOrderRepository implements OrderRepository {
         'p_order_id': id,
         'p_accept': false,
         'p_reason': (reason != null && reason.trim().isNotEmpty) ? reason.trim() : null,
+      });
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    }
+  }
+
+  @override
+  Future<void> startOrder(String id) async {
+    try {
+      await _client.rpc('start_order', params: {
+        'p_order_id': id,
       });
     } on PostgrestException catch (e) {
       throw _mapPostgrestException(e);

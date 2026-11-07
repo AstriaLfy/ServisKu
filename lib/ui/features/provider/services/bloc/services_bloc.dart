@@ -112,6 +112,7 @@ class ServicesBloc extends Bloc<ServicesEvent, ServicesState> {
         categoryId: event.categoryId,
         name: event.name,
         price: event.price,
+        photoFilePath: event.photoFilePath,
       );
 
       final freshServices = await _repository.getServices();
@@ -142,6 +143,8 @@ class ServicesBloc extends Bloc<ServicesEvent, ServicesState> {
         categoryId: event.categoryId,
         name: event.name,
         price: event.price,
+        photoFilePath: event.photoFilePath,
+        previousPhotoPath: event.previousPhotoPath,
       );
 
       final freshServices = await _repository.getServices();

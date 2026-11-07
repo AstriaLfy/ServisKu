@@ -28,10 +28,13 @@ class OrderCubit extends Cubit<OrderState> {
       emit(OrderLoaded(allOrders: orders, selectedFilter: currentFilter));
 
       // Subscribe realtime if not yet subscribed
-      if (_subscription == null) {
-        _shopId ??= await _orderRepository.getShopId();
-        if (_shopId != null) {
-          _subscription = _orderRepository.watchOrders(_shopId!, () {
+      final shopId = await _orderRepository.getShopId();
+      if (_subscription == null || shopId != _shopId) {
+        _subscription?.unsubscribe();
+        _subscription = null;
+        _shopId = shopId;
+        if (shopId != null) {
+          _subscription = _orderRepository.watchOrders(shopId, () {
             _refreshSilently();
           });
         }

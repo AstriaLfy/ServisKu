@@ -41,15 +41,17 @@ class ServiceCreated extends ServicesEvent {
   final int categoryId;
   final String name;
   final int price;
+  final String? photoFilePath;
 
   const ServiceCreated({
     required this.categoryId,
     required this.name,
     required this.price,
+    this.photoFilePath,
   });
 
   @override
-  List<Object?> get props => [categoryId, name, price];
+  List<Object?> get props => [categoryId, name, price, photoFilePath];
 }
 
 /// Update layanan yang ada
@@ -58,16 +60,20 @@ class ServiceUpdated extends ServicesEvent {
   final int categoryId;
   final String name;
   final int price;
+  final String? photoFilePath;
+  final String? previousPhotoPath;
 
   const ServiceUpdated({
     required this.id,
     required this.categoryId,
     required this.name,
     required this.price,
+    this.photoFilePath,
+    this.previousPhotoPath,
   });
 
   @override
-  List<Object?> get props => [id, categoryId, name, price];
+  List<Object?> get props => [id, categoryId, name, price, photoFilePath, previousPhotoPath];
 }
 
 /// Hapus layanan (soft delete)
