@@ -128,6 +128,10 @@ class CustomerOrderDetailView extends StatelessWidget {
                 OrderStatusBadge(status: order.status),
               ],
             ),
+            if (order.status == OrderStatus.pending) ...[
+              const SizedBox(height: 12),
+              _buildWaitingBanner(order),
+            ],
             const SizedBox(height: 14),
             const Text(
               'Alamat Kamu',
@@ -200,6 +204,56 @@ class CustomerOrderDetailView extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildWaitingBanner(CustomerOrder order) {
+    final timeText = order.responseTimeLeft > Duration.zero
+        ? 'Penyedia jasa punya waktu sekitar ${order.responseTimeLeftLabel} untuk merespons. Jika tidak ada respons, pesanan dibatalkan otomatis.'
+        : 'Batas waktu respons sudah habis, pesanan akan segera dibatalkan otomatis.';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFBFDBFE)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Menunggu konfirmasi penyedia jasa',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E3A8A),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  timeText,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF1E40AF), height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

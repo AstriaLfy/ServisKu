@@ -71,6 +71,32 @@ class OrderDetailCubit extends Cubit<OrderDetailState> {
     }
   }
 
+  Future<void> startOrder() async {
+    if (state is! OrderDetailLoaded) return;
+    final currentState = state as OrderDetailLoaded;
+    final orderId = currentState.order.id;
+
+    emit(currentState.copyWith(isActionInProgress: true, clearError: true, clearSuccess: true));
+    try {
+      await _orderRepository.startOrder(orderId);
+      final updated = await _orderRepository.getOrderDetail(orderId);
+      emit(currentState.copyWith(
+        order: updated,
+        isActionInProgress: false,
+        successMessage: 'Pekerjaan dimulai',
+      ));
+    } catch (e) {
+      final msg = e.toString().replaceAll('Exception: ', '');
+      emit(currentState.copyWith(
+        isActionInProgress: false,
+        errorMessage: msg,
+      ));
+      if (msg.contains('Status order sudah berubah')) {
+        await _refreshSilently(orderId);
+      }
+    }
+  }
+
   Future<void> completeOrder() async {
     if (state is! OrderDetailLoaded) return;
     final currentState = state as OrderDetailLoaded;

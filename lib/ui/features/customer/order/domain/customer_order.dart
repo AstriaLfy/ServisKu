@@ -5,6 +5,8 @@ import 'package:servis_ku/ui/features/provider/order/domain/order_entity.dart';
 import 'package:servis_ku/ui/features/provider/order/domain/order_status.dart';
 
 class CustomerOrder extends Equatable {
+  static const Duration responseTimeout = Duration(minutes: 20);
+
   final OrderEntity order;
   final String shopName;
   final String? shopPhotoUrl;
@@ -76,6 +78,22 @@ class CustomerOrder extends Equatable {
       status == OrderStatus.cancelled || status == OrderStatus.rejected;
 
   bool get canCancel => status == OrderStatus.pending;
+
+  Duration get responseTimeLeft {
+    final left = createdAt.add(responseTimeout).difference(DateTime.now());
+    return left.isNegative ? Duration.zero : left;
+  }
+
+  String get responseTimeLeftLabel {
+    final left = responseTimeLeft;
+    if (left.inDays >= 1) {
+      final hours = left.inHours % 24;
+      return hours > 0 ? '${left.inDays} hari $hours jam' : '${left.inDays} hari';
+    }
+    if (left.inHours >= 1) return '${left.inHours} jam';
+    final minutes = (left.inSeconds / 60).ceil();
+    return minutes >= 60 ? '1 jam' : '$minutes menit';
+  }
 
   bool get isRated => rating != null && rating! > 0;
 

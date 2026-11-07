@@ -571,14 +571,23 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: CustomButton(
-                      text: 'Selesaikan Order',
-                      height: 46,
-                      isLoading: isActionInProgress,
-                      onPressed: isActionInProgress
-                          ? null
-                          : () => _showCompleteDialog(context, cubit),
-                    ),
+                    child: order.status == OrderStatus.accepted
+                        ? CustomButton(
+                            text: 'Mulai Kerjakan',
+                            height: 46,
+                            isLoading: isActionInProgress,
+                            onPressed: isActionInProgress
+                                ? null
+                                : () => cubit.startOrder(),
+                          )
+                        : CustomButton(
+                            text: 'Selesaikan Order',
+                            height: 46,
+                            isLoading: isActionInProgress,
+                            onPressed: isActionInProgress
+                                ? null
+                                : () => _showCompleteDialog(context, cubit),
+                          ),
                   ),
                 ],
               ),
